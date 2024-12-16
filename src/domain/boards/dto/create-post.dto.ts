@@ -2,10 +2,12 @@
 import { Transform } from "class-transformer";
 import { IsNumber, IsOptional, IsString,  } from "class-validator";
 import { format } from "date-fns";
+import { Column } from "typeorm";
 
 export class CreateBoardPostDto {
 
     @IsNumber()
+    @Column('board_id')
     readonly boardId: number;
 
     @IsString()

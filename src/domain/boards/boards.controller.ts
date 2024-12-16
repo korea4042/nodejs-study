@@ -1,10 +1,9 @@
-import { Controller, Get, Post, Param, Body, Delete, Patch, Req, Session } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Delete, Patch } from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { CreateBoardPostDto } from './dto/create-post.dto';
 import { UpdateBoardPostDto } from './dto/update-post.dto';
 import { CheckMyPostDto } from './dto/check-my-post.dto';
-import { SessionData } from 'express-session';
 
 @Controller('boards')
 export class BoardsController {
