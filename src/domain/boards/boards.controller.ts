@@ -20,12 +20,12 @@ export class BoardsController {
     }
 
     @Get('/:boardId')
-    getBoardPostAll(@Param('boardId') boardId) {
+    async getBoardPostAll(@Param('boardId') boardId) {
         console.time('generateBoardPost');
-        const data = this.boardService.getBoardPostAll(boardId);
+        const data = await this.boardService.getBoardPostAll(boardId);
         console.timeEnd('generateBoardPost');
 
-        return data;
+        // return data;
     }
 
     @Get('/:boardId/:id')
