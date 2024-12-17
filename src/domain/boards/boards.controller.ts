@@ -21,7 +21,11 @@ export class BoardsController {
 
     @Get('/:boardId')
     getBoardPostAll(@Param('boardId') boardId) {
-        return this.boardService.getBoardPostAll(boardId);
+        console.time('generateBoardPost');
+        const data = this.boardService.getBoardPostAll(boardId);
+        console.timeEnd('generateBoardPost');
+
+        return data;
     }
 
     @Get('/:boardId/:id')
@@ -35,8 +39,11 @@ export class BoardsController {
     }
 
     @Post('/:boardId')
-    createBoardPost(@Body() postData: CreateBoardPostDto) {
-        return this.boardService.createBoardPost(postData);
+    async createBoardPost(@Body() postData: CreateBoardPostDto) {
+        console.time('generateBoardPost');
+        // 예시: 20명의 더미 사용자 생성
+        await this.boardService.createBoardPost(postData);
+        console.timeEnd('generateBoardPost');
     }
 
     @Patch('/:boardId/:id')

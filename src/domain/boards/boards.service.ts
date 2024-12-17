@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Board } from './entities/board.entity';
 import { BoardPost } from './entities/board-post.entity';
 import { CreateBoardPostDto } from './dto/create-post.dto';
@@ -6,15 +6,14 @@ import { UpdateBoardPostDto } from './dto/update-post.dto';
 import { CreateBoardDto } from './dto/create-board.dto';
 import * as bcrypt from 'bcrypt';
 import { CheckMyPostDto } from './dto/check-my-post.dto';
-import { SessionData } from 'express-session';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository } from 'typeorm';
-import e from 'express';
+import { faker } from '@faker-js/faker';
+import { format } from 'date-fns';
+import { createHash } from 'crypto';
 
 @Injectable()
 export class BoardsService {
-    private boardPosts: BoardPost[] = [];
-    private boards: Board[] = [];
     private checkedPost: BoardPost[] = [];
 
     constructor(
@@ -128,16 +127,46 @@ export class BoardsService {
      */
     async createBoardPost(boardPostData: CreateBoardPostDto): Promise<BoardPost> {
 
-        this.getBoardOne(boardPostData.boardId);
-        const { boardId, title, contents, passwd, writer, registDate } = boardPostData;
-        const hashedPasswd = await bcrypt.hash(passwd, 10);
-        const newPost = {
-            boardId, title, contents,
-            passwd: hashedPasswd,
-            writer, registDate
+        // this.getBoardOne(boardPostData.boardId);
+        // const { boardId, title, contents, passwd, writer, registDate } = boardPostData;
+        // const hashedPasswd = await bcrypt.hash(passwd, 10);
+        // const newPost = {
+        //     boardId, title, contents,
+        //     passwd: hashedPasswd,
+        //     writer, registDate
+        // }
+        let dataObj = null;
+        for (let index = 0; index < 1000; index++) {
+            // const hashedPasswd = await bcrypt.hash(faker.internet.password(), 1);
+            const hash = createHash('sha256');
+            hash.update(faker.internet.password());
+            const newPost = this.boardPostRepository.create({
+                boardId: 1,
+                title: faker.commerce.productName(),
+                writer: faker.person.fullName(),
+                contents: faker.commerce.productDescription(),
+                passwd: hash.digest('hex'),
+                registDate: format(faker.date.past(), 'yyyy-MM-dd HH:mm:ss')
+            });
+
+
+            const boardPost = this.boardPostRepository.create(newPost);
+            let dataObj = await this.boardPostRepository.save(boardPost);
+
         }
-        const boardPost = this.boardPostRepository.create(newPost);
-        return this.boardPostRepository.save(boardPost);
+        // const hashedPasswd = await bcrypt.hash(faker.internet.password(), 10);
+        // const newPost = this.boardPostRepository.create({
+        //     boardId: 1,
+        //     title: faker.commerce.productName(),
+        //     writer: faker.person.fullName(),
+        //     contents: faker.commerce.productDescription(),
+        //     passwd: hashedPasswd,
+        //     registDate: format(faker.date.past(), 'yyyy-MM-dd HH:mm:ss')
+        // });
+
+
+        // const boardPost = this.boardPostRepository.create(newPost);
+        return dataObj;
     }
 
     /**
