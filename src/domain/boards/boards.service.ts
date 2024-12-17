@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Board } from './entities/board.entity';
 import { BoardPost } from './entities/board-post.entity';
 import { CreateBoardPostDto } from './dto/create-post.dto';
@@ -7,7 +7,7 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import * as bcrypt from 'bcrypt';
 import { CheckMyPostDto } from './dto/check-my-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DataSource, DeleteResult, QueryRunner, Repository } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import { format } from 'date-fns';
 import { createHash } from 'crypto';
@@ -17,6 +17,7 @@ export class BoardsService {
     private checkedPost: BoardPost[] = [];
 
     constructor(
+        private readonly dataSource: DataSource,
         @InjectRepository(BoardPost)
         private boardPostRepository: Repository<BoardPost>,
         @InjectRepository(Board)
@@ -120,12 +121,48 @@ export class BoardsService {
 
 
 
+
+    async generatePostsWithTransaction(boardPostData: CreateBoardPostDto): Promise<void> {
+        const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
+
+        await queryRunner.connect(); // 연결
+        await queryRunner.startTransaction(); // 트랜잭션 시작
+
+        try {
+
+            for (let i = 0; i < 1000; i++) {
+                const hash = createHash('sha256');
+                hash.update(faker.internet.password());
+
+                const newPost = this.boardPostRepository.create({
+                    boardId: 1,
+                    title: faker.commerce.productName(),
+                    writer: faker.person.fullName(),
+                    contents: faker.commerce.productDescription(),
+                    passwd: hash.digest('hex'),
+                    registDate: format(faker.date.past(), 'yyyy-MM-dd HH:mm:ss'),
+                });
+                await queryRunner.manager.save(newPost);
+            }
+
+            await queryRunner.commitTransaction(); // 성공 시 커밋
+        } catch (error) {
+            await queryRunner.rollbackTransaction(); // 실패 시 롤백
+            console.error('Error in transaction:', error);
+            throw new InternalServerErrorException('Failed to generate posts');
+        } finally {
+            await queryRunner.release(); // QueryRunner 해제
+        }
+    }
+
+
     /**
      * create boardPost
      * @param boardPostData
      * @returns BoardPost
      */
     async createBoardPost(boardPostData: CreateBoardPostDto): Promise<BoardPost> {
+
 
         // this.getBoardOne(boardPostData.boardId);
         // const { boardId, title, contents, passwd, writer, registDate } = boardPostData;
@@ -137,7 +174,7 @@ export class BoardsService {
         // }
         let dataObj = null;
         for (let index = 0; index < 1000; index++) {
-            // const hashedPasswd = await bcrypt.hash(faker.internet.password(), 1);
+            // const hashedPasswd = await bcrypt.hash(faker.internet.password(), 10);
             const hash = createHash('sha256');
             hash.update(faker.internet.password());
             const newPost = this.boardPostRepository.create({
@@ -150,8 +187,8 @@ export class BoardsService {
             });
 
 
-            const boardPost = this.boardPostRepository.create(newPost);
-            let dataObj = await this.boardPostRepository.save(boardPost);
+            // const boardPost = this.boardPostRepository.create(newPost);
+            let dataObj = await this.boardPostRepository.insert(newPost);
 
         }
         // const hashedPasswd = await bcrypt.hash(faker.internet.password(), 10);

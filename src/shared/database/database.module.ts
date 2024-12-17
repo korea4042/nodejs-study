@@ -19,7 +19,7 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
             entities: [__dirname + '/../../domain/**/entities/*.entity.{js,ts}'], // 엔티티 파일 경로
             namingStrategy: new SnakeNamingStrategy(),
             synchronize: false, // 스키마 자동 동기화 여부 (운영환경에서는 false)
-            logging: false, // 쿼리 로깅 활성화
+            logging: true, // 쿼리 로깅 활성화
         }),
     ],
 

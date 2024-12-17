@@ -42,7 +42,7 @@ export class BoardsController {
     async createBoardPost(@Body() postData: CreateBoardPostDto) {
         console.time('generateBoardPost');
         // 예시: 20명의 더미 사용자 생성
-        await this.boardService.createBoardPost(postData);
+        await this.boardService.generatePostsWithTransaction(postData);
         console.timeEnd('generateBoardPost');
     }
 
