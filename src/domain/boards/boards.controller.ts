@@ -25,7 +25,7 @@ export class BoardsController {
         const data = await this.boardService.getBoardPostAll(boardId);
         console.timeEnd('generateBoardPost');
 
-        // return data;
+        return data;
     }
 
     @Get('/:boardId/:id')
@@ -34,7 +34,7 @@ export class BoardsController {
     }
 
     @Post('/:boardId/:id/check')
-    checkMyPost(@Param('id') id, @Body() pwsswdData: CheckMyPostDto) {
+    checkMyPost(@Param('id') id: number, @Body() pwsswdData: CheckMyPostDto) {
         return this.boardService.checkMyPost(id, pwsswdData);
     }
 
@@ -47,12 +47,12 @@ export class BoardsController {
     }
 
     @Patch('/:boardId/:id')
-    updateBoardPost(@Param('id') id, @Body() postData: UpdateBoardPostDto) {
+    updateBoardPost(@Param('id') id: number, @Body() postData: UpdateBoardPostDto) {
         return this.boardService.updateBoardPost(id, postData);
     }
 
     @Delete('/:boardId/:id')
-    deleteBoardPost(@Param('id') id) {
-        this.boardService.deleteBoardPostOne(id);
+    async deleteBoardPost(@Param('id') id: number) {
+        await this.boardService.deleteBoardPostOne(id);
     }
 }

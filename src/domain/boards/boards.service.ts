@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { Board } from './entities/board.entity';
 import { BoardPost } from './entities/board-post.entity';
 import { CreateBoardPostDto } from './dto/create-post.dto';
@@ -15,7 +15,7 @@ import { createHash } from 'crypto';
 @Injectable()
 export class BoardsService {
     private checkedPost: BoardPost[] = [];
-
+    private readonly logger = new Logger(BoardsService.name);
     constructor(
         private readonly dataSource: DataSource,
         @InjectRepository(BoardPost)
@@ -60,12 +60,29 @@ export class BoardsService {
      * @returns Array
      */
     async getBoardPostAll(boardId: number): Promise<BoardPost[]> {
-        return this.boardPostRepository.find({
+        const data = await this.boardPostRepository.find({
             where: {
                 boardId: boardId,
+                // id: 100,
             },
             select: ['id', 'title', 'writer', 'registDate']
         });
+        // 비동기 map 처리
+        const processedData = await Promise.all(
+            data.map(async (item, idx) => {
+                // 비밀번호 해시화
+                item.passwd = await bcrypt.hash(item.passwd??'', 5);
+                // 로그 기록
+                if(idx === 0){
+                    this.logger.log(`Processing index: ${idx}`);
+                }else if(idx === data.length-1){
+                    this.logger.log(`Processing index: ${idx}`);
+                }
+                return item;
+            }),
+        );
+        
+        return processedData;
     }
 
     /**
@@ -115,7 +132,7 @@ export class BoardsService {
      * @param id 
      */
     async deleteBoardPostOne(id: number): Promise<DeleteResult> {
-        await this.getBoardPostOne(id);
+        this.getBoardPostOne(id);
         return await this.boardPostRepository.delete(id);
     }
 

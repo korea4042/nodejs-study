@@ -25,6 +25,7 @@
     "@nestjs/core": "^10.4.13",
     "@nestjs/mapped-types": "^2.0.6",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-fastify": "^10.4.15",
     "@nestjs/typeorm": "^10.0.2",
     "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",

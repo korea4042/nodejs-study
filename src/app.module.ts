@@ -21,7 +21,7 @@ console.log(process.env);
         BoardsModule,
         SeederModule,
     ],
-    controllers: [AppController, BoardsController],
-    providers: [AppService, BoardsService, SeederService],
+    controllers: [AppController],
+    providers: [AppService, SeederService],
 })
 export class AppModule { }
